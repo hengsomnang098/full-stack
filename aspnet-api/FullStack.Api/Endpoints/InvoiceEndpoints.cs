@@ -1,5 +1,5 @@
-using FullStack.Api.Application.Common;
-using FullStack.Api.Application.Interfaces;
+using FullStack.Application.Common;
+using FullStack.Application.Interfaces;
 
 namespace FullStack.Api.Endpoints;
 

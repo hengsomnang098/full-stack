@@ -1,10 +1,35 @@
 ﻿# FullStack.Api (ASP.NET Core Minimal API)
 
-ASP.NET Identity, JWT in **HttpOnly cookies**, SOLID `IService`/`Service` layers, manual DTO mapping, Serilog, Swagger, **PostgreSQL** (Docker).
+ASP.NET Identity, JWT in **HttpOnly cookies**, Clean Architecture layers, manual DTO mapping, Serilog, Swagger, **PostgreSQL** (Docker).
 
 ## Prerequisites
 - .NET SDK 11
 - Docker Desktop (for Postgres)
+
+## Solution layout
+
+```
+aspnet-api/
+  FullStack.slnx
+  FullStack.Domain/           # Entities only (no outward deps)
+  FullStack.Application/      # DTOs, interfaces, services, mapping
+  FullStack.Infrastructure/   # EF Core, Identity, JWT, file storage
+  FullStack.Api/              # Endpoints, Program, host DI/CORS/Swagger
+```
+
+Dependency rule:
+
+```
+Api → Infrastructure → Application → Domain
+Api → Application
+```
+
+| Layer | Responsibility |
+|-------|----------------|
+| **Domain** | Entities (`Category`, `Product`, `ApplicationUser`, …) |
+| **Application** | Use cases (`*Service`), DTOs, mappers, `IAppDbContext` / port interfaces |
+| **Infrastructure** | `AppDbContext`, JWT/cookie auth, uploads, Identity stores, `AddInfrastructure()` |
+| **Api** | Minimal API endpoints, Serilog, CORS, Swagger, startup/seed |
 
 ## Start PostgreSQL
 From the repo root:
@@ -31,24 +56,18 @@ Defaults:
 
 ## Run API
 ```powershell
-cd aspnet-api/FullStack.Api
-dotnet run --launch-profile http
+cd aspnet-api
+dotnet run --project FullStack.Api --launch-profile http
 ```
 - Swagger: http://localhost:8081/swagger
 - Frontend uses `withCredentials` against port `8081`
+
+Or open `FullStack.slnx` in your IDE and run the `FullStack.Api` project.
 
 ## Security
 - Passwords via **ASP.NET Identity**
 - Access + refresh JWTs as **HttpOnly** cookies (not in JSON / localStorage)
 - CORS restricted + `AllowCredentials`
-
-## Architecture
-```
-Domain/Entities
-Application/DTOs + Mapping (manual) + Interfaces + Services
-Infrastructure/Data + Auth + Storage
-Endpoints/*Endpoints.cs
-```
 
 ## Auth
 | Method | Path |

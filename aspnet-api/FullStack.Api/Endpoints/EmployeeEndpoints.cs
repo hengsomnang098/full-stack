@@ -1,6 +1,6 @@
-using FullStack.Api.Application.DTOs.Common;
-using FullStack.Api.Application.DTOs.Employees;
-using FullStack.Api.Application.Interfaces;
+using FullStack.Application.DTOs.Common;
+using FullStack.Application.DTOs.Employees;
+using FullStack.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FullStack.Api.Endpoints;

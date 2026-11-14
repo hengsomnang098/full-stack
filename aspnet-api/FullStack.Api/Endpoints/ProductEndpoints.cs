@@ -1,7 +1,7 @@
-using FullStack.Api.Application.DTOs.Common;
-using FullStack.Api.Application.DTOs.Products;
-using FullStack.Api.Application.Interfaces;
-using FullStack.Api.Application.Mapping;
+using FullStack.Application.DTOs.Common;
+using FullStack.Application.DTOs.Products;
+using FullStack.Application.Interfaces;
+using FullStack.Application.Mapping;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FullStack.Api.Endpoints;

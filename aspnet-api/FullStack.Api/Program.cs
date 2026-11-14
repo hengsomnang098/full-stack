@@ -1,6 +1,6 @@
 ﻿using FullStack.Api.Endpoints;
 using FullStack.Api.Extensions;
-using FullStack.Api.Infrastructure.Data;
+using FullStack.Infrastructure.Data;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,11 +12,8 @@ builder.Services.ConfigureHttpJsonOptions(o =>
     o.SerializerOptions.NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString);
 
 builder.Services
-    .RegisterDb(builder.Configuration)
-    .RegisterIdentity()
-    .RegisterJwtAuthentication(builder.Configuration)
+    .RegisterLayers(builder.Configuration)
     .RegisterCors(builder.Configuration)
-    .RegisterApplicationServices()
     .RegisterSwagger();
 
 var app = builder.Build();

@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="FullStack.Api/FullStack.Api.csproj" />
+  <Project Path="FullStack.Application/FullStack.Application.csproj" />
+  <Project Path="FullStack.Domain/FullStack.Domain.csproj" />
+  <Project Path="FullStack.Infrastructure/FullStack.Infrastructure.csproj" />
+</Solution>

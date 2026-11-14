@@ -1,5 +1,5 @@
-using FullStack.Api.Application.DTOs.Pos;
-using FullStack.Api.Application.Interfaces;
+using FullStack.Application.DTOs.Pos;
+using FullStack.Application.Interfaces;
 
 namespace FullStack.Api.Endpoints;
 

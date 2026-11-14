@@ -1,5 +1,5 @@
 using System.Text.Json;
-using FullStack.Api.Application.DTOs.Common;
+using FullStack.Application.DTOs.Common;
 
 namespace FullStack.Api.Endpoints;
 

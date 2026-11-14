@@ -1,6 +1,6 @@
-﻿using FullStack.Api.Application.DTOs.Auth;
-using FullStack.Api.Application.DTOs.Common;
-using FullStack.Api.Application.Interfaces;
+﻿using FullStack.Application.DTOs.Auth;
+using FullStack.Application.DTOs.Common;
+using FullStack.Application.Interfaces;
 
 namespace FullStack.Api.Endpoints;
 

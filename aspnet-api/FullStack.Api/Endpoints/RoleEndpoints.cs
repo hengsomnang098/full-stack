@@ -1,5 +1,5 @@
-using FullStack.Api.Application.DTOs.Roles;
-using FullStack.Api.Application.Interfaces;
+using FullStack.Application.DTOs.Roles;
+using FullStack.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FullStack.Api.Endpoints;
