@@ -26,7 +26,7 @@ const LoginPage = () => {
         // Login success
         setUser(res.user);
         setAccessToken(res.access_token);
-        setRefreshToken(request.refresh_token);
+        setRefreshToken(res.refresh_token);
         navigate("/");
       }
     }
