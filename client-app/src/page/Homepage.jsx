@@ -1,107 +1,99 @@
-import { useState } from "react";
-
 import {
-  Button,
-  Checkbox,
-  DatePicker,
-  Flex,
-  Input,
-  InputNumber,
-  QRCode,
-  Radio,
-  Select,
-  Space,
-  Spin,
-  Modal,
-} from "antd";
-import { DeleteFilled, SaveFilled } from "@ant-design/icons";
+  TeamOutlined,
+  ShopOutlined,
+  ProductOutlined,
+  FileTextOutlined,
+  AppstoreOutlined,
+  UserOutlined,
+  CreditCardOutlined,
+  SafetyCertificateOutlined,
+} from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
+import MainPage from "../components/page/MainPage";
+import { getUser } from "../config/helper";
+import { brand } from "../theme";
+
+const tiles = [
+  {
+    path: "/pos",
+    label: "POS",
+    desc: "Search products and check out orders",
+    icon: <ShopOutlined />,
+  },
+  {
+    path: "/product",
+    label: "Products",
+    desc: "Manage catalog, price, and images",
+    icon: <ProductOutlined />,
+  },
+  {
+    path: "/customer",
+    label: "Customers",
+    desc: "Customer profiles and contacts",
+    icon: <TeamOutlined />,
+  },
+  {
+    path: "/invoice",
+    label: "Invoices",
+    desc: "Review sales history",
+    icon: <FileTextOutlined />,
+  },
+  {
+    path: "/category",
+    label: "Categories",
+    desc: "Organize product groups",
+    icon: <AppstoreOutlined />,
+  },
+  {
+    path: "/employee",
+    label: "Employees",
+    desc: "Staff accounts and roles",
+    icon: <UserOutlined />,
+  },
+  {
+    path: "/payment-method",
+    label: "Payments",
+    desc: "Configure payment methods",
+    icon: <CreditCardOutlined />,
+  },
+  {
+    path: "/order-status",
+    label: "Order status",
+    desc: "Workflow statuses for orders",
+    icon: <SafetyCertificateOutlined />,
+  },
+];
+
 const HomePage = () => {
-  const { Option } = Select;
-  const [open, seOpen] = useState(false);
-
-  const options = [];
-  for (let i = 10; i < 36; i++) {
-    options.push({
-      value: i.toString(36) + i,
-      label: i.toString(36) + i,
-    });
-  }
-
-  const onOpenModal = () => {
-    seOpen(true);
-  };
-
-  const handleOk = () => {
-    seOpen(false);
-  };
-
-  const handleCancel = () => {
-    seOpen(false);
-  };
+  const navigate = useNavigate();
+  const user = getUser();
+  const first = user?.Firstname || user?.FirstName || "there";
 
   return (
-    <div>
-      <Flex gap={"small"}>
-        <Button disabled={true}>Save1</Button>
-        <Button loading={true} type="primary">
-          Save1
-        </Button>
-        <Button size="small" type="dashed">
-          Save2
-        </Button>
-        <Button
-          style={{ width: 200, marginTop: 10 }}
-          danger={true}
-          type="primary"
-        >
-          Save2
-        </Button>
-      </Flex>
-      <div style={{ width: 300, backgroundColor: "lightgray", marginTop: 10 }}>
-        <Button block={true}>AAAA</Button>
+    <MainPage>
+      <div className="dash-hero">
+        <h1>Welcome back, {first}</h1>
+        <p>
+          Quick access to the tools you use most in {brand.name}. Everything
+          scales cleanly from phone to desktop.
+        </p>
       </div>
 
-      <Button icon={<DeleteFilled />}>Delete</Button>
-      <Button danger={true} icon={<DeleteFilled />} />
-      <SaveFilled style={{ fontSize: 35, margin: 20 }} />
-
-      <Space>
-        <Input placeholder="username" /> <br />
-        <Input placeholder="Lastname" />
-        <Input.TextArea placeholder="Des" />
-        <InputNumber />
-        <Checkbox />
-        <Radio />
-        <Select style={{ width: 200 }}>
-          <Option value="1">Active </Option>
-          <Option value="0">InActive </Option>
-        </Select>
-        <DatePicker />
-        <Select
-          mode="tags"
-          style={{
-            width: 300,
-          }}
-          placeholder="Tags Mode"
-          // onChange={handleChange}
-          options={options}
-        />
-        <QRCode value={"https://"} />
-        <Spin spinning={true} />
-      </Space>
-
-      <br />
-      <Button onClick={onOpenModal}>Open Modal</Button>
-      <Modal
-        title="Basic Modal"
-        open={open}
-        onOk={handleOk}
-        onCancel={handleCancel}
-      >
-        <Input placeholder="A" />
-        <Input placeholder="A" />
-      </Modal>
-    </div>
+      <div className="dash-grid">
+        {tiles.map((tile) => (
+          <button
+            key={tile.path}
+            type="button"
+            className="dash-tile"
+            onClick={() => navigate(tile.path)}
+          >
+            <span className="dash-tile__icon">{tile.icon}</span>
+            <span className="dash-tile__label">{tile.label}</span>
+            <span className="dash-tile__desc">{tile.desc}</span>
+          </button>
+        ))}
+      </div>
+    </MainPage>
   );
 };
 

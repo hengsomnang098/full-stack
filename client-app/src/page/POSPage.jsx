@@ -3,7 +3,6 @@ import { request } from "../config/request";
 import {
   Table,
   Button,
-  Space,
   Modal,
   Input,
   Form,
@@ -11,8 +10,6 @@ import {
   message,
   Image,
   Tag,
-  Row,
-  Col,
   InputNumber,
 } from "antd";
 import { Config, isEmptyOrNull } from "../config/helper";
@@ -164,38 +161,36 @@ const POSPage = () => {
 
   return (
     <MainPage loading={loading}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          paddingBottom: 10,
-        }}
-      >
-        <Space>
-          <div className="txt_title">Product</div>
-
-          <Input.Search
-            allowClear
-            onSearch={onTextSearch}
-            placeholder="Name or Code"
-            size="large"
-          />
-
-          <Button type="primary" size="large">
-            Clear
-          </Button>
-        </Space>
+      <div className="page-toolbar" style={{ marginBottom: 16 }}>
+        <div className="txt_title">POS cart</div>
+        <Input.Search
+          allowClear
+          onSearch={onTextSearch}
+          placeholder="Scan or search product"
+          size="large"
+        />
+        <Button
+          type="default"
+          size="large"
+          onClick={() => {
+            setList([]);
+            setSubTotal(0);
+            setTotalDiscount(0);
+            setTtotalToPay(0);
+          }}
+        >
+          Clear
+        </Button>
       </div>
 
-      <Row gutter={15}>
-        <Col span={16}>
+      <div className="pos-layout">
+        <div className="table-scroll">
           <Table
-            className=" justify-center"
             rowKey={"Id"}
             dataSource={list}
+            scroll={{ x: 720 }}
             pagination={{
               pageSize: 5,
-              // total: 100,
             }}
             columns={[
               {
@@ -206,12 +201,12 @@ const POSPage = () => {
                   return (
                     <>
                       <div>
-                        {index + 1} {item.Name}
+                        {index + 1}. {item.Name}
                       </div>
                       <div>
                         <Tag
                           color={item.Qty > 5 ? "green" : "red"}
-                          className=" w-16 text-center font-bold"
+                          className="w-16 text-center font-bold"
                         >
                           {item.Qty}
                         </Tag>
@@ -225,28 +220,32 @@ const POSPage = () => {
                 key: "QtyOrder",
                 title: "Qty",
                 dataIndex: "QtyOrder",
+                width: 70,
               },
               {
                 key: "Price",
                 title: "Price",
                 dataIndex: "Price",
+                width: 90,
+                responsive: ["sm"],
               },
               {
                 key: "Dis",
                 title: "Dis",
                 dataIndex: "Discount",
+                width: 70,
+                responsive: ["md"],
               },
               {
                 key: "Total",
                 title: "Total",
+                width: 90,
                 render: (value, items) => {
                   let QtyOrder = items.QtyOrder;
                   let Price = items.Price;
                   let Dis = items.Discount == null ? 0 : items.Discount;
                   let DiscountPrice = (QtyOrder * Price * Dis) / 100;
-                  // let Total = Price;
                   var Total = QtyOrder * Price - DiscountPrice;
-                  // var Total = 3333;
                   return Total;
                 },
               },
@@ -254,50 +253,52 @@ const POSPage = () => {
                 key: "Image",
                 title: "Image",
                 dataIndex: "Image",
+                responsive: ["lg"],
                 render: (value) => {
                   if (value != null && value != "") {
                     return (
                       <Image
                         src={Config.image_path + value}
-                        width={100}
-                        height={100}
+                        width={64}
+                        height={64}
+                        style={{ objectFit: "cover", borderRadius: 8 }}
                       />
                     );
-                  } else {
-                    return (
-                      <div
-                        style={{
-                          height: 100,
-                          width: 100,
-                          backgroundColor: "#888",
-                        }}
-                      ></div>
-                    );
                   }
+                  return (
+                    <div
+                      style={{
+                        height: 64,
+                        width: 64,
+                        backgroundColor: "#CBD5E1",
+                        borderRadius: 8,
+                      }}
+                    />
+                  );
                 },
               },
-
               {
                 key: "Action",
-                title: "Action",
+                title: "",
                 dataIndex: "Status",
+                width: 64,
                 render: (value, item) => (
-                  <Space>
-                    <Button
-                      onClick={() => onClickBtnDelete(item)}
-                      type="primary"
-                      danger
-                      size="large"
-                    >
-                      <DeleteOutlined />
-                    </Button>
-                  </Space>
+                  <Button
+                    onClick={() => onClickBtnDelete(item)}
+                    type="primary"
+                    danger
+                    size="large"
+                    aria-label="Remove item"
+                  >
+                    <DeleteOutlined />
+                  </Button>
                 ),
               },
             ]}
           />
-        </Col>
-        <Col span={8} className=" bg-gray-200">
+        </div>
+
+        <div className="pos-checkout">
           <Form form={formCat} layout="vertical" onFinish={onFinish}>
             <Form.Item
               label="Customer"
@@ -305,7 +306,7 @@ const POSPage = () => {
               rules={[
                 {
                   required: true,
-                  message: "Please fil in Customer!",
+                  message: "Please select a customer",
                 },
               ]}
             >
@@ -330,12 +331,11 @@ const POSPage = () => {
               rules={[
                 {
                   required: true,
-                  message: "Please input Payment Method!",
+                  message: "Please select a payment method",
                 },
               ]}
             >
               <Select
-                // onSelect={onSelectCategory}
                 placeholder="Select Payment Method"
                 showSearch
                 optionFilterProp="label"
@@ -350,38 +350,34 @@ const POSPage = () => {
               </Select>
             </Form.Item>
 
-            <div className="flex justify-between p-2">
-              <div>Sub Total</div>
+            <div className="pos-summary-row">
+              <div>Sub total</div>
               <div>{subTotal}$</div>
             </div>
-
-            <div className="flex justify-between p-2">
+            <div className="pos-summary-row">
               <div>Discount</div>
               <div>{totalDiscount}$</div>
             </div>
-
-            <div className="flex justify-between p-2">
+            <div className="pos-summary-row pos-summary-row--total">
               <div>Total</div>
               <div>{totalToPay}$</div>
             </div>
-            <Form.Item name="PaidAmount" style={{ textAlign: "right" }}>
-              <Space>
-                <InputNumber
-                  placeholder="Amount to Pay"
-                  style={{ width: "100%" }}
-                />
-              </Space>
+
+            <Form.Item name="PaidAmount" style={{ marginTop: 12 }}>
+              <InputNumber
+                placeholder="Amount to pay"
+                style={{ width: "100%" }}
+                size="large"
+              />
             </Form.Item>
-            <Form.Item style={{ textAlign: "right" }}>
-              <Space>
-                <Button type="primary" htmlType="submit" size="large">
-                  Check Out
-                </Button>
-              </Space>
+            <Form.Item style={{ marginBottom: 0 }}>
+              <Button type="primary" htmlType="submit" size="large" block>
+                Check out
+              </Button>
             </Form.Item>
           </Form>
-        </Col>
-      </Row>
+        </div>
+      </div>
     </MainPage>
   );
 };

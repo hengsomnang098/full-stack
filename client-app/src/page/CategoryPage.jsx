@@ -112,21 +112,22 @@ const CategoryPage = () => {
   return (
     <MainPage loading={loading}>
       <Typography>
-        <Title level={3}>Manage Category</Title>
+        <Title level={3} style={{ marginTop: 0 }}>
+          Manage Category
+        </Title>
       </Typography>
-      <div className="flex 2xl:flex-row flex-col gap-2 justify-start">
+      <div className="page-toolbar">
         <Input.Search
           allowClear
           onChange={onChangeSearch}
           placeholder="Name or Code"
           size="large"
-          className="2xl:w-96"
         />
         <Select
           onChange={onChangeStatus}
           placeholder="Status"
-          className="2xl:w-36"
           size="large"
+          style={{ minWidth: 140 }}
           defaultValue={"1"}
         >
           <Select.Option value={"1"}>Active</Select.Option>
@@ -146,6 +147,7 @@ const CategoryPage = () => {
       <Table
         rowKey="Id"
         dataSource={list}
+        scroll={{ x: 720 }}
         pagination={{
           pageSize: 5,
           // total: 100,

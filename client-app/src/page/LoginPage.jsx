@@ -1,89 +1,101 @@
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
-import { Button, Checkbox, Form, Input } from "antd";
+import { Button, Checkbox, Form, Input, Typography, message } from "antd";
+import { Link, useNavigate } from "react-router-dom";
 import { request } from "../config/request";
 import { setUser } from "../config/helper";
-import { useNavigate } from "react-router-dom";
+import { brand } from "../theme";
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const [form] = Form.useForm();
 
   const onFinish = async (values) => {
-    var username = values.username;
-    var password = values.password;
-    if (username == "" || password == "") {
-      alert("Please fill in username or password!");
-      return false;
+    const username = values.username?.trim();
+    const password = values.password;
+    if (!username || !password) {
+      message.warning("Please fill in username and password.");
+      return;
     }
-    var data = {
+
+    const res = await request("employee/login", "post", {
       Username: username,
       Password: password,
-    };
-    const res = await request("employee/login", "post", data);
-    if (res) {
-      if (res.error) {
-        alert(res.message);
-      } else {
-        // Tokens are HttpOnly cookies from the API — only keep profile client-side
-        setUser(res.user);
-        navigate("/");
-      }
+    });
+
+    if (!res) return;
+
+    if (res.error) {
+      message.error(res.message || "Login failed");
+      return;
     }
+
+    setUser(res.user);
+    navigate("/");
   };
 
   return (
-    <div
-      style={{
-        width: 500,
-        margin: "auto",
-        marginTop: 100,
-        backgroundColor: "#eee",
-        padding: 30,
-        borderRadius: 10,
-      }}
-    >
-      <Form name="normal_login" onFinish={onFinish}>
-        <h1>Login</h1>
-        <Form.Item
-          name="username"
-          rules={[
-            {
-              required: true,
-              message: "Please input your Username!",
-            },
-          ]}
+    <div className="auth-page">
+      <div className="auth-card">
+        <div className="auth-card__brand">
+          <div className="auth-card__logo">N</div>
+          <h1 className="auth-card__title">{brand.name}</h1>
+          <p className="auth-card__subtitle">Sign in to manage sales and inventory</p>
+        </div>
+
+        <Form
+          form={form}
+          name="login"
+          layout="vertical"
+          requiredMark={false}
+          initialValues={{ remember: true }}
+          onFinish={onFinish}
         >
-          <Input prefix={<UserOutlined />} placeholder="Username" />
-        </Form.Item>
-        <Form.Item
-          name="password"
-          rules={[
-            {
-              required: true,
-              message: "Please input your Password!",
-            },
-          ]}
-        >
-          <Input
-            prefix={<LockOutlined />}
-            type="password"
-            placeholder="Password"
-          />
-        </Form.Item>
-        <Form.Item>
-          <Form.Item name="remember" valuePropName="checked" noStyle>
-            <Checkbox>Remember me</Checkbox>
+          <Form.Item
+            name="username"
+            label="Username"
+            rules={[{ required: true, message: "Please input your username" }]}
+          >
+            <Input
+              size="large"
+              prefix={<UserOutlined />}
+              placeholder="Phone / username"
+              autoComplete="username"
+            />
           </Form.Item>
 
-          <a href="">Forgot password</a>
-        </Form.Item>
+          <Form.Item
+            name="password"
+            label="Password"
+            rules={[{ required: true, message: "Please input your password" }]}
+          >
+            <Input.Password
+              size="large"
+              prefix={<LockOutlined />}
+              placeholder="Password"
+              autoComplete="current-password"
+            />
+          </Form.Item>
 
-        <Form.Item>
-          <Button type="primary" htmlType="submit">
-            Log in
-          </Button>
-          Or <a href="">register now!</a>
-        </Form.Item>
-      </Form>
+          <Form.Item>
+            <div className="auth-card__meta">
+              <Form.Item name="remember" valuePropName="checked" noStyle>
+                <Checkbox>Remember me</Checkbox>
+              </Form.Item>
+              <Typography.Text type="secondary">Forgot password?</Typography.Text>
+            </div>
+          </Form.Item>
+
+          <Form.Item>
+            <Button type="primary" htmlType="submit" size="large">
+              Log in
+            </Button>
+          </Form.Item>
+
+          <Typography.Paragraph type="secondary" style={{ textAlign: "center", marginBottom: 0 }}>
+            Need an account? <Link to="/register">Register</Link>
+          </Typography.Paragraph>
+        </Form>
+      </div>
     </div>
   );
 };

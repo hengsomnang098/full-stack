@@ -1,3 +1,94 @@
+@import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --nit-primary: #0f766e;
+  --nit-primary-soft: #ccfbf1;
+  --nit-ink: #0f172a;
+  --nit-muted: #64748b;
+  --nit-surface: #f1f5f9;
+  --nit-panel: #ffffff;
+  --nit-sider: #0b3d3a;
+  --nit-radius: 14px;
+  --nit-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  --nit-font: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --nit-display: "Instrument Serif", Georgia, serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--nit-font);
+  color: var(--nit-ink);
+  background: var(--nit-surface);
+  -webkit-font-smoothing: antialiased;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: var(--nit-primary);
+}
+
+/* Shared page utilities */
+.page-shell {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.page-toolbar .ant-input-search,
+.page-toolbar .ant-select {
+  min-width: min(100%, 16rem);
+  flex: 1 1 12rem;
+}
+
+.table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.brand-mark {
+  font-family: var(--nit-display);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.txt_title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--nit-ink);
+}
+
+@media (max-width: 767px) {
+  .page-toolbar .ant-btn {
+    width: 100%;
+  }
+}

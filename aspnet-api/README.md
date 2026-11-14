@@ -49,7 +49,7 @@ Defaults:
 | Key | Description |
 |-----|-------------|
 | `ConnectionStrings:DefaultConnection` | Npgsql connection string |
-| `Database:InitMode` | `EnsureCreated` (default), `Migrate`, or `None` |
+| `Database:InitMode` | `Migrate` (default), `EnsureCreated`, or `None` |
 | `Jwt:*` | Secrets (≥ 32 chars), cookie names, lifetimes |
 | `Cors:AllowedOrigins` | Frontend origins (credentials allowed) |
 | `Seed:*` | Admin tel `099998888` / password `Admin@12345` |
@@ -78,7 +78,28 @@ Or open `FullStack.slnx` in your IDE and run the `FullStack.Api` project.
 | POST | `/api/employee/setPassword` |
 | GET | `/api/employee/me` |
 
+## EF Core migrations
+
+Migrations live in **Infrastructure** (`FullStack.Infrastructure/Data/Migrations`), next to `AppDbContext`.
+
+From `aspnet-api/`:
+
+```powershell
+# Add a migration after model changes
+dotnet ef migrations add <Name> --project FullStack.Infrastructure --startup-project FullStack.Api --output-dir Data/Migrations
+
+# Apply to the database (or just run the API with Database:InitMode=Migrate)
+dotnet ef database update --project FullStack.Infrastructure --startup-project FullStack.Api
+
+# Remove the last unapplied migration
+dotnet ef migrations remove --project FullStack.Infrastructure --startup-project FullStack.Api
+```
+
+`AppDbContextFactory` supports design-time tooling without starting Kestrel. At runtime, `DbSeeder` calls `MigrateAsync()` when `Database:InitMode` is `Migrate`.
+
+**Note:** Do not switch an existing DB that was created with `EnsureCreated` over to `Migrate` on the same database — drop it first (or baseline `__EFMigrationsHistory`). Fresh Docker volume + `Migrate` is the intended path.
+
 ## Notes
-- First run with `EnsureCreated` creates schema + seeds admin.
+- First run with `Migrate` applies `InitialCreate` and seeds admin.
 - Old MySQL `database/table.sql` is legacy reference only; schema is owned by EF now.
 - `node-api` remains for reference.
