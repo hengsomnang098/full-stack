@@ -1,11 +1,14 @@
-const express = require(`express`);
-const app = express();
+require("dotenv").config();
+const express = require("express");
 const cors = require("cors");
+
+const app = express();
 app.use(express.json());
 
+const corsOrigin = process.env.CORS_ORIGIN || "http://localhost:5173";
 app.use(
   cors({
-    origin: "*",
+    origin: corsOrigin.split(",").map((o) => o.trim()),
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   })
 );
@@ -44,7 +47,7 @@ pos(app);
 const invoice = require("./src/route/invoice.route");
 invoice(app);
 
-const port = 8081;
+const port = process.env.PORT || 8081;
 app.listen(port, () => {
   console.log("http://localhost:" + port);
 });

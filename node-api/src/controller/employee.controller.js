@@ -1,35 +1,59 @@
-const db = require("../config/db"); //import db connection funct
+const db = require("../config/db");
 const { logError, validation } = require("../config/helper");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } = require("../config/token_key");
+const {
+  ACCESS_TOKEN_KEY,
+  REFRESH_TOKEN_KEY,
+  ACCESS_TOKEN_EXPIRES_IN,
+  REFRESH_TOKEN_EXPIRES_IN,
+} = require("../config/token_key");
+
+const EMPLOYEE_SAFE_COLUMNS =
+  "e.Id, e.RoleId, e.Firstname, e.Lastname, e.Gender, e.Dob, e.Tel, e.Email, e.Address, e.Status, e.Image, e.Salary, e.CreateAt, e.CreateBy, e.UpdateAt, e.UpdateBy";
 
 const setPassword = async (req, res) => {
   try {
     var { Tel, Password, ConfirmPassword } = req.body;
-    // var Tel = req.body.Tel;
-    // var Password = req.body.Password;
-    // var ConfirmPassword = req.body.ConfirmPassword;
-    //Check Tel is exist ?
-    const [user] = await db.query("SELECT * FROM employee WHERE Tel=:Tel", {
-      Tel: Tel,
-    });
-    if (user.length == 0) {
-      res.json({
+
+    if (validation(Tel) || validation(Password) || validation(ConfirmPassword)) {
+      res.status(400).json({
         error: true,
-        message: "User doesn't exist!",
+        message: "Tel, Password, and ConfirmPassword are required",
       });
-      return false;
-    } else if (Password != ConfirmPassword) {
-      //Chech Password and ConfirmPassword
-      res.json({
+      return;
+    }
+
+    if (Password !== ConfirmPassword) {
+      res.status(400).json({
         error: true,
         message: "Password and confirm password not match!",
       });
-      return false;
+      return;
     }
-    //set password after hash to db
-    const passHash = await bcrypt.hashSync(Password, 10); //hash password => 12345 => #$@JLKDJF:LSJFLSKDJFSLF
+
+    // Authenticated users may only reset their own password unless RoleId is admin (1)
+    const isAdmin = req.user && Number(req.user.RoleId) === 1;
+    if (!isAdmin && req.user && req.user.Tel !== Tel) {
+      res.status(403).json({
+        error: true,
+        message: "You can only set your own password",
+      });
+      return;
+    }
+
+    const [user] = await db.query("SELECT Id FROM employee WHERE Tel=:Tel", {
+      Tel: Tel,
+    });
+    if (user.length == 0) {
+      res.status(400).json({
+        error: true,
+        message: "Unable to set password",
+      });
+      return;
+    }
+
+    const passHash = bcrypt.hashSync(Password, 10);
     const [data] = await db.query(
       "UPDATE employee SET Password=:Password WHERE Tel = :Tel",
       { Password: passHash, Tel: Tel }
@@ -37,7 +61,7 @@ const setPassword = async (req, res) => {
     res.json({
       message: data.affectedRows
         ? "Password set successfully"
-        : "Somthing wrong!",
+        : "Something wrong!",
     });
   } catch (err) {
     logError("employee.setPassword", err, res);
@@ -47,25 +71,40 @@ const setPassword = async (req, res) => {
 const login = async (req, res) => {
   try {
     var { Username, Password } = req.body;
-    const [user] = await db.query("SELECT * FROM employee WHERE Tel=:Tel", {
-      Tel: Username,
-    });
-    if (user.length == 0) {
-      res.json({
-        error: true,
-        message: "User doesn't exist!",
-      });
-      return false;
+    const genericError = {
+      error: true,
+      message: "Invalid username or password",
+    };
+
+    if (validation(Username) || validation(Password)) {
+      res.status(400).json(genericError);
+      return;
     }
-    var passwordFromDb = user[0].Password; //o302upowu4ilj;lfkja3irjoe
+
+    const [user] = await db.query(
+      "SELECT Id, RoleId, Firstname, Lastname, Gender, Dob, Tel, Email, Address, Status, Image, Salary, Password FROM employee WHERE Tel=:Tel",
+      { Tel: Username }
+    );
+    if (user.length == 0) {
+      res.status(401).json(genericError);
+      return;
+    }
+
+    var passwordFromDb = user[0].Password;
+    if (!passwordFromDb) {
+      res.status(401).json(genericError);
+      return;
+    }
 
     var isCorrectPassword = bcrypt.compareSync(Password, passwordFromDb);
     if (isCorrectPassword) {
-      delete user[0].Password; // remove column password
+      delete user[0].Password;
       var access_token = jwt.sign({ data: user[0] }, ACCESS_TOKEN_KEY, {
-        expiresIn: "20h",
+        expiresIn: ACCESS_TOKEN_EXPIRES_IN,
       });
-      var refresh_token = jwt.sign({ data: user[0] }, REFRESH_TOKEN_KEY);
+      var refresh_token = jwt.sign({ data: user[0] }, REFRESH_TOKEN_KEY, {
+        expiresIn: REFRESH_TOKEN_EXPIRES_IN,
+      });
       res.json({
         message: "Login success",
         user: user[0],
@@ -73,10 +112,7 @@ const login = async (req, res) => {
         refresh_token: refresh_token,
       });
     } else {
-      res.json({
-        message: "Incorrect Password!",
-        error: true,
-      });
+      res.status(401).json(genericError);
     }
   } catch (err) {
     logError("employee.login", err, res);
@@ -84,13 +120,12 @@ const login = async (req, res) => {
 };
 
 const CheckToken = () => {
-  // call this function in middleware
   return (req, res, next) => {
-    var authorization = req.headers.authorization; // token from client
+    var authorization = req.headers.authorization;
     var token_from_client = null;
     if (authorization != null && authorization != "") {
-      token_from_client = authorization.split(" "); // authorization : "Bearer lkjsljrl;kjsiejr;lqjl;ksjdfakljs;ljl;r"
-      token_from_client = token_from_client[1]; // get only access_token
+      token_from_client = authorization.split(" ");
+      token_from_client = token_from_client[1];
     }
     if (token_from_client == null) {
       res.status(401).send({
@@ -104,8 +139,8 @@ const CheckToken = () => {
             error: error,
           });
         } else {
-          req.user = result.data; // write user property
-          req.user_id = result.data.Id; // write user property
+          req.user = result.data;
+          req.user_id = result.data.Id;
           next();
         }
       });
@@ -128,19 +163,21 @@ const refresh_token = async (req, res) => {
             error: error,
           });
         } else {
-          // new access && refresh
-          var access_token = await jwt.sign(
+          var access_token = jwt.sign(
             { data: result.data },
             ACCESS_TOKEN_KEY,
-            { expiresIn: "60s" }
+            { expiresIn: ACCESS_TOKEN_EXPIRES_IN }
           );
-          var refesh_token = await jwt.sign(
+          var refresh_token_new = jwt.sign(
             { data: result.data },
-            REFRESH_TOKEN_KEY
+            REFRESH_TOKEN_KEY,
+            { expiresIn: REFRESH_TOKEN_EXPIRES_IN }
           );
           res.json({
             access_token: access_token,
-            refesh_token: refesh_token,
+            refresh_token: refresh_token_new,
+            // keep legacy key for older clients
+            refesh_token: refresh_token_new,
           });
         }
       });
@@ -155,7 +192,9 @@ const getlist = async (req, res) => {
     var { txt_search, status, role_id } = req.query;
     var param = {};
     var sql =
-      "SELECT e.*,r.Name as RoleName FROM employee e INNER JOIN role r ON e.RoleId = r.Id WHERE 1=1 ";
+      "SELECT " +
+      EMPLOYEE_SAFE_COLUMNS +
+      ", r.Name as RoleName FROM employee e INNER JOIN role r ON e.RoleId = r.Id WHERE 1=1 ";
 
     if (!validation(txt_search)) {
       sql +=
@@ -183,17 +222,18 @@ const getlist = async (req, res) => {
       user_id: req.user,
     });
   } catch (err) {
-    console.log(sql);
     logError("employee.getlist", err, res);
   }
 };
+
 const getOne = async (req, res) => {
   try {
     var param = {
-      Id: req.body.Id,
+      Id: req.body.Id || req.query.Id,
     };
-    var sql = "SELECT * FROM employee WHERE Id=:Id";
-    const data = await db.query(sql, param);
+    var sql =
+      "SELECT Id, RoleId, Firstname, Lastname, Gender, Dob, Tel, Email, Address, Status, Image, Salary, CreateAt, CreateBy, UpdateAt, UpdateBy FROM employee WHERE Id=:Id";
+    const [data] = await db.query(sql, param);
     res.json({
       data: data,
     });
@@ -206,7 +246,7 @@ const create = async (req, res) => {
   try {
     var sql = `
       INSERT INTO employee  (RoleId,Firstname, Lastname, Gender, Dob, Tel, Email, Address, Status,Image,Salary) 
-      VALUES (:RoleId,:Firstname, :Lastname, :Gender, :Dob, :Tel, :Email, :Status, :Address,:Image,:Salary)`;
+      VALUES (:RoleId,:Firstname, :Lastname, :Gender, :Dob, :Tel, :Email, :Address, :Status,:Image,:Salary)`;
     var param = {
       RoleId: req.body.RoleId,
       Firstname: req.body.Firstname,
@@ -247,7 +287,7 @@ const update = async (req, res) => {
       Status: req.body.Status,
       Salary: req.body.Salary,
       CreateBy: req.body.CreateBy,
-      UpdateBy: req.body.UpdateBy,
+      UpdateBy: req.user_id || req.body.UpdateBy,
     };
     const [data] = await db.query(sql, param);
     res.json({

@@ -1,0 +1,53 @@
+require("dotenv").config();
+const express = require("express");
+const cors = require("cors");
+
+const app = express();
+app.use(express.json());
+
+const corsOrigin = process.env.CORS_ORIGIN || "http://localhost:5173";
+app.use(
+  cors({
+    origin: corsOrigin.split(",").map((o) => o.trim()),
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  })
+);
+
+app.get("/", (req, res) => {
+  res.send("Hello world");
+});
+
+const user = require("./src/route/role.route");
+user(app);
+
+const customer = require("./src/route/customer.route");
+customer(app);
+
+const category = require("./src/route/category.route");
+category(app);
+
+const order_payment_method = require("./src/route/order_payment_method.route");
+order_payment_method(app);
+
+const order_status = require("./src/route/order_status.route");
+order_status(app);
+
+const employee = require("./src/route/employee.route");
+employee(app);
+
+const product = require("./src/route/product.route");
+product(app);
+
+const supplier = require("./src/route/supplier.route");
+supplier(app);
+
+const pos = require("./src/route/pos.route");
+pos(app);
+
+const invoice = require("./src/route/invoice.route");
+invoice(app);
+
+const port = process.env.PORT || 8081;
+app.listen(port, () => {
+  console.log("http://localhost:" + port);
+});

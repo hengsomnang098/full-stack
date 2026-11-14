@@ -1,22 +1,13 @@
-// var mysql = require(`mysql`);
-
-// const db = mysql.createConnection({
-//   host: "localhost",
-//   user: "root",
-//   password: "",
-//   database: "full_stack",
-//   port: 3306,
-// });
-// module.exports = db;
-
 const mysql = require("mysql2/promise");
+
 const db = mysql.createPool({
-  host: "localhost",
-  user: "root",
-  password: "",
-  database: "full_stack",
-  port: 3306,
+  host: process.env.DB_HOST || "localhost",
+  user: process.env.DB_USER || "root",
+  password: process.env.DB_PASSWORD || "",
+  database: process.env.DB_NAME || "full_stack",
+  port: Number(process.env.DB_PORT || 3306),
   connectionLimit: 10,
   namedPlaceholders: true,
 });
+
 module.exports = db;
