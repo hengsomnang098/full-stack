@@ -108,7 +108,7 @@ const MainLayout = () => {
             </div>
             <div style={{ display: "flex" }}>
               <Title level={4} type="success">
-                {user?.Firstname}-{user?.Lastname}
+                {user?.Firstname || user?.FirstName}-{user?.Lastname || user?.LastName}
               </Title>
               <div
                 style={{

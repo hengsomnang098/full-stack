@@ -1,0 +1,8 @@
+**/bin/
+**/obj/
+**/logs/
+*.user
+.env
+appsettings.*.local.json
+FullStack.Api/wwwroot/uploads/*
+!FullStack.Api/wwwroot/uploads/.gitkeep

@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: fullstack-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: fullstack
+      POSTGRES_PASSWORD: fullstack
+      POSTGRES_DB: full_stack
+    ports:
+      - "5432:5432"
+    volumes:
+      - fullstack_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fullstack -d full_stack"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  fullstack_pgdata:

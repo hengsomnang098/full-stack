@@ -1,10 +1,10 @@
 import dayjs from "dayjs";
+import axios from "axios";
 
 export const Config = {
   base_url: "http://localhost:8081/api/",
-  image_path: "http://localhost:8080/fullstack/image_g7/",
+  image_path: "http://localhost:8081/uploads/",
   version: "",
-  token: "",
 };
 
 export const isEmptyOrNull = (value) => {
@@ -34,36 +34,25 @@ export const setUser = (user = {}) => {
   localStorage.setItem("isLogin", "1");
 };
 
-export const setAccessToken = (access_token) => {
-  localStorage.setItem("access_token", access_token);
-};
-
-export const getAccessToken = (access_token) => {
-  return localStorage.getItem("access_token", access_token);
-};
-
-export const setRefreshToken = (refresh_token) => {
-  localStorage.setItem("refresh_token", refresh_token);
-};
-
-export const getRefreshToken = (refresh_token) => {
-  return localStorage.getItem("refresh_token", refresh_token);
-};
-
-export const logout = () => {
+export const logout = async () => {
+  try {
+    await axios.post(
+      Config.base_url + "employee/logout",
+      {},
+      { withCredentials: true }
+    );
+  } catch {
+    // ignore — clear local session anyway
+  }
   localStorage.setItem("profile", "");
   localStorage.setItem("isLogin", "0");
-  localStorage.setItem("access_token", "");
-  localStorage.setItem("refresh_token", "");
+  localStorage.removeItem("access_token");
+  localStorage.removeItem("refresh_token");
   window.location.href = "login";
 };
 
 export const isLogin = () => {
-  if (localStorage.getItem("isLogin") == "1") {
-    return true;
-  } else {
-    return false;
-  }
+  return localStorage.getItem("isLogin") == "1";
 };
 
 export const formartDateClient = (date) => {

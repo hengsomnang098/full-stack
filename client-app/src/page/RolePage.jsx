@@ -228,7 +228,7 @@ const RolePage = () => {
       <Modal
         forceRender
         title={
-          formCat.getFieldValue("Id") == null ? "New Catetory" : "Update role"
+          formCat.getFieldValue("Id") == null ? "New Role" : "Update role"
         }
         open={open}
         onCancel={onCloseModal}

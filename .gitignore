@@ -2,6 +2,18 @@
 node_modules/
 **/node_modules/
 
+# .NET
+**/bin/
+**/obj/
+**/logs/
+
+# Docker
+*.override.local.yml
+*.user
+*.suo
+aspnet-api/**/wwwroot/uploads/*
+!aspnet-api/**/wwwroot/uploads/.gitkeep
+
 # Environment / secrets
 .env
 .env.*

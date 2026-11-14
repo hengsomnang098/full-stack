@@ -1,7 +1,7 @@
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { Button, Checkbox, Form, Input } from "antd";
 import { request } from "../config/request";
-import { setAccessToken, setRefreshToken, setUser } from "../config/helper";
+import { setUser } from "../config/helper";
 import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
@@ -15,18 +15,16 @@ const LoginPage = () => {
       return false;
     }
     var data = {
-      Username: username, //099998888
-      Password: password, //"123456"
+      Username: username,
+      Password: password,
     };
     const res = await request("employee/login", "post", data);
     if (res) {
       if (res.error) {
         alert(res.message);
       } else {
-        // Login success
+        // Tokens are HttpOnly cookies from the API — only keep profile client-side
         setUser(res.user);
-        setAccessToken(res.access_token);
-        setRefreshToken(res.refresh_token);
         navigate("/");
       }
     }
